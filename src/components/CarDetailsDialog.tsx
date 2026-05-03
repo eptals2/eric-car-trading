@@ -1,0 +1,190 @@
+import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { PHP } from "@/lib/format";
+import { toast } from "sonner";
+import type { Tables } from "@/integrations/supabase/types";
+
+type Car = Tables<"cars">;
+
+const inquirySchema = z.object({
+  full_name: z.string().trim().min(2, "Name required").max(100),
+  contact_number: z.string().trim().min(7, "Valid number required").max(20),
+  email: z.string().trim().email("Invalid email").max(255).optional().or(z.literal("")),
+  agree: z.literal(true, { errorMap: () => ({ message: "You must agree" }) }),
+});
+
+export function CarDetailsDialog({ car, open, onOpenChange }: { car: Car | null; open: boolean; onOpenChange: (v: boolean) => void }) {
+  const price = car?.price ? Number(car.price) : 0;
+  const minDp = Math.round(price * 0.1);
+  const maxDp = Math.round(price * 0.6);
+
+  const [downpayment, setDownpayment] = useState(minDp);
+  const [years, setYears] = useState(3);
+  const [formOpen, setFormOpen] = useState<null | "quote" | "reserve">(null);
+
+  useEffect(() => {
+    setDownpayment(Math.round(price * 0.2));
+    setYears(3);
+  }, [car?.id, price]);
+
+  const monthly = useMemo(() => {
+    if (!price) return 0;
+    return Math.max(0, Math.round((price - downpayment) / (years * 12)));
+  }, [price, downpayment, years]);
+
+  if (!car) return null;
+  const outOfStock = car.status === "out_of_stock";
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-3xl">{car.name}</DialogTitle>
+          </DialogHeader>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="overflow-hidden rounded-lg bg-muted">
+              {car.image_url ? (
+                <img src={car.image_url} alt={car.name} className="h-64 w-full object-cover md:h-full" />
+              ) : (
+                <div className="flex h-64 items-center justify-center text-muted-foreground">No image</div>
+              )}
+            </div>
+            <div className="space-y-4">
+              <div>
+                <div className="text-xs uppercase tracking-widest text-muted-foreground">Price</div>
+                <div className="font-display text-4xl text-primary">{PHP(price)}</div>
+                {outOfStock && <Badge variant="destructive" className="mt-2">Out of Stock</Badge>}
+              </div>
+              {car.description && <p className="text-sm text-muted-foreground">{car.description}</p>}
+
+              <div className="rounded-lg border bg-card p-4 space-y-5">
+                <div className="text-xs font-semibold uppercase tracking-widest text-primary">Customize Payment</div>
+
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <Label>Downpayment</Label>
+                    <span className="font-semibold">{PHP(downpayment)}</span>
+                  </div>
+                  <Slider value={[downpayment]} min={minDp} max={maxDp} step={5000} onValueChange={(v) => setDownpayment(v[0])} />
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <Label>Years to Pay</Label>
+                    <span className="font-semibold">{years} {years === 1 ? "year" : "years"}</span>
+                  </div>
+                  <Slider value={[years]} min={1} max={5} step={1} onValueChange={(v) => setYears(v[0])} />
+                </div>
+
+                <div className="rounded-md bg-primary/10 p-3 text-center">
+                  <div className="text-xs uppercase tracking-widest text-muted-foreground">Monthly Payment</div>
+                  <div className="font-display text-2xl text-primary">{PHP(monthly)}/mo</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" disabled={outOfStock} onClick={() => setFormOpen("quote")}>Get Free Quote</Button>
+            <Button disabled={outOfStock} onClick={() => setFormOpen("reserve")}>Reserve This Unit</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <InquiryForm
+        open={!!formOpen}
+        onOpenChange={(v) => !v && setFormOpen(null)}
+        type={formOpen ?? "quote"}
+        car={car}
+        downpayment={downpayment}
+        monthly={monthly}
+        years={years}
+      />
+    </>
+  );
+}
+
+function InquiryForm({ open, onOpenChange, type, car, downpayment, monthly, years }: {
+  open: boolean; onOpenChange: (v: boolean) => void;
+  type: "quote" | "reserve"; car: Car; downpayment: number; monthly: number; years: number;
+}) {
+  const [submitting, setSubmitting] = useState(false);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const parsed = inquirySchema.safeParse({
+      full_name: fd.get("full_name"),
+      contact_number: fd.get("contact_number"),
+      email: fd.get("email") || "",
+      agree: fd.get("agree") === "on",
+    });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from("inquiries").insert({
+      car_id: car.id,
+      full_name: parsed.data.full_name,
+      contact_number: parsed.data.contact_number,
+      email: parsed.data.email || null,
+      downpayment,
+      monthly_payment: monthly,
+      years_to_pay: years,
+      inquiry_type: type,
+    });
+    setSubmitting(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(type === "reserve" ? "Reservation submitted! We'll contact you shortly." : "Quote requested! We'll be in touch.");
+    onOpenChange(false);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-display text-2xl">
+            {type === "reserve" ? "Reserve Unit" : "Get Free Quote"}
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="rounded-md bg-muted p-3 text-sm space-y-1">
+            <div><span className="text-muted-foreground">Car: </span><strong>{car.name}</strong></div>
+            <div><span className="text-muted-foreground">Downpayment: </span>{PHP(downpayment)}</div>
+            <div><span className="text-muted-foreground">Monthly: </span>{PHP(monthly)} × {years * 12} mos</div>
+          </div>
+          <div>
+            <Label htmlFor="full_name">Full Name *</Label>
+            <Input id="full_name" name="full_name" required maxLength={100} />
+          </div>
+          <div>
+            <Label htmlFor="contact_number">Contact Number *</Label>
+            <Input id="contact_number" name="contact_number" required maxLength={20} placeholder="+63 ..." />
+          </div>
+          <div>
+            <Label htmlFor="email">Email (optional)</Label>
+            <Input id="email" name="email" type="email" maxLength={255} />
+          </div>
+          <label className="flex items-start gap-2 text-sm">
+            <Checkbox name="agree" id="agree" className="mt-0.5" />
+            <span>I agree to the Privacy Policy and authorize Eric Car Trading to contact me.</span>
+          </label>
+          <Button type="submit" className="w-full" disabled={submitting}>
+            {submitting ? "Submitting..." : type === "reserve" ? "Confirm Reservation" : "Request Quote"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
