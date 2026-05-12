@@ -40,9 +40,9 @@ function AdminPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate({ to: "/auth" }); return; }
-      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
+      const { data: { user }, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !user) { navigate({ to: "/auth" }); return; }
+      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
       const admin = !!roles?.some((r) => r.role === "admin");
       setIsAdmin(admin);
       setAuthChecked(true);
