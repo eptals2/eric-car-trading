@@ -107,7 +107,11 @@ function Index() {
           <p className="text-center py-12 text-muted-foreground">No cars listed yet.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {cars.map((c) => (
+            {[...cars].sort((a, b) => {
+              if (sort === "price_asc") return Number(a.price) - Number(b.price);
+              if (sort === "price_desc") return Number(b.price) - Number(a.price);
+              return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            }).map((c) => (
               <article key={c.id} className="group overflow-hidden rounded-lg border bg-card shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-glow)]">
                 <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                   {c.image_url ? (
