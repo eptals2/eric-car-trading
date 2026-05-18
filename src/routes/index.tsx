@@ -79,12 +79,22 @@ function Index() {
 
       {/* Cars */}
       <section id="cars" className="container mx-auto px-4 py-12">
-        <div className="flex items-end justify-between mb-8">
+        <div className="flex items-end justify-between mb-8 gap-4 flex-wrap">
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">The Lineup</div>
             <h2 className="font-display text-4xl md:text-5xl">Available Cars</h2>
           </div>
-          <div className="text-sm text-muted-foreground hidden sm:block">{cars.length} units</div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-muted-foreground hidden sm:block">{cars.length} units</span>
+            <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+              <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="price_asc">Price: Low to High</SelectItem>
+                <SelectItem value="price_desc">Price: High to Low</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {loading ? (
