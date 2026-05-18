@@ -20,6 +20,7 @@ function Index() {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Car | null>(null);
+  const [sort, setSort] = useState<"newest" | "price_asc" | "price_desc">("newest");
 
   useEffect(() => {
     supabase.from("cars").select("*").order("created_at", { ascending: false }).then(({ data }) => {
