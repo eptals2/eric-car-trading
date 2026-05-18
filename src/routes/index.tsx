@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { CarDetailsDialog } from "@/components/CarDetailsDialog";
@@ -19,6 +20,7 @@ function Index() {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Car | null>(null);
+  const [sort, setSort] = useState<"newest" | "price_asc" | "price_desc">("newest");
 
   useEffect(() => {
     supabase.from("cars").select("*").order("created_at", { ascending: false }).then(({ data }) => {
@@ -77,12 +79,22 @@ function Index() {
 
       {/* Cars */}
       <section id="cars" className="container mx-auto px-4 py-12">
-        <div className="flex items-end justify-between mb-8">
+        <div className="flex items-end justify-between mb-8 gap-4 flex-wrap">
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">The Lineup</div>
             <h2 className="font-display text-4xl md:text-5xl">Available Cars</h2>
           </div>
-          <div className="text-sm text-muted-foreground hidden sm:block">{cars.length} units</div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-muted-foreground hidden sm:block">{cars.length} units</span>
+            <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+              <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="price_asc">Price: Low to High</SelectItem>
+                <SelectItem value="price_desc">Price: High to Low</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {loading ? (
@@ -95,7 +107,11 @@ function Index() {
           <p className="text-center py-12 text-muted-foreground">No cars listed yet.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {cars.map((c) => (
+            {[...cars].sort((a, b) => {
+              if (sort === "price_asc") return Number(a.price) - Number(b.price);
+              if (sort === "price_desc") return Number(b.price) - Number(a.price);
+              return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            }).map((c) => (
               <article key={c.id} className="group overflow-hidden rounded-lg border bg-card shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-glow)]">
                 <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                   {c.image_url ? (
