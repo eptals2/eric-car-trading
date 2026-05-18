@@ -49,9 +49,9 @@ function Index() {
               <Button size="lg" asChild className="shadow-[var(--shadow-glow)]">
                 <a href="#cars">Browse Cars <ArrowRight className="ml-2 h-4 w-4" /></a>
               </Button>
-              <Button size="lg" variant="outline" className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white" asChild>
+              {/* <Button size="lg" variant="outline" className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white" asChild>
                 <a href="#why">Why Eric</a>
-              </Button>
+              </Button> */}
             </div>
           </div>
         </div>
