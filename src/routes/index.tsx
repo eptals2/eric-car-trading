@@ -89,7 +89,7 @@ function Index() {
             <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
               <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="newest">Newest</SelectItem>
+                {/* <SelectItem value="newest">Newest</SelectItem> */}
                 <SelectItem value="price_asc">Price: Low to High</SelectItem>
                 <SelectItem value="price_desc">Price: High to Low</SelectItem>
               </SelectContent>
