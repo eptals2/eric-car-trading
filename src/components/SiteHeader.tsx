@@ -16,8 +16,9 @@ export function SiteHeader() {
           </div>
         </Link>
         <nav className="flex items-center gap-2 text-sm">
-          {/* <Link to="/" className="px-3 py-2 text-foreground/80 hover:text-primary">Browse</Link>
-          <Link to="/admin" className="px-3 py-2 text-foreground/80 hover:text-primary">Admin</Link> */}
+          <Link to="#hero" className="px-3 py-2 text-foreground/80 hover:text-primary">Home</Link>
+          <Link to="#contact" className="px-3 py-2 text-foreground/80 hover:text-primary">Contact</Link>
+          <Link to="#cars" className="px-3 py-2 text-foreground/80 hover:text-primary">Browse</Link>
         </nav>
       </div>
     </header>

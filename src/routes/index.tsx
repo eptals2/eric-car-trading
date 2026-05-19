@@ -35,6 +35,7 @@ function Index() {
 
       {/* Hero */}
       <section
+        id="hero"
         className="relative overflow-hidden text-white"
         style={{ background: "var(--gradient-hero)" }}
       >
@@ -136,7 +137,9 @@ function Index() {
         )}
       </section>
 
-      <SiteFooter />
+      <section id="contact">
+        <SiteFooter/>
+      </section>
       <CarDetailsDialog car={selected} open={!!selected} onOpenChange={(v) => !v && setSelected(null)} />
     </div>
   );
