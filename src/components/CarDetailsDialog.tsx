@@ -36,11 +36,6 @@ export function CarDetailsDialog({ car, open, onOpenChange }: { car: Car | null;
     setYears(3);
   }, [car?.id, price]);
 
-  // const monthly = useMemo(() => {
-  //   if (!price) return 0;
-  //   return Math.max(0, Math.round((price - downpayment) / (years * 12)));
-  // }, [price, downpayment, years]);
-
   const monthly = useMemo(() => {
     if (!price) return 0;
     const amountFinanced = price - downpayment;
