@@ -89,6 +89,7 @@ export function CarDetailsDialog({ car, open, onOpenChange }: { car: Car | null;
                 <div className="rounded-md bg-primary/10 p-3 text-center">
                   <div className="text-xs uppercase tracking-widest text-muted-foreground">Monthly Payment</div>
                   <div className="font-display text-2xl text-primary">{PHP(monthly)}/mo</div>
+                  <div className="text-xs">Note: Price, Down Payment and Monthly Payment may change without prior notice.</div>
                 </div>
               </div>
             </div>
