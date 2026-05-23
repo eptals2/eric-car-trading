@@ -43,7 +43,7 @@ function Index() {
           <div className="max-w-3xl">
             <Badge className="mb-5 bg-white/10 text-white hover:bg-white/15 border-0">Trusted dealership</Badge>
             <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">
-              FIND YOUR<br /><span className="text-primary-foreground/95 [text-shadow:0_0_40px_oklch(0.65_0.24_27_/_0.6)]">DREAM CAR</span> TODAY
+              GET YOUR<br /><span className="text-primary-foreground/95 [text-shadow:0_0_40px_oklch(0.65_0.24_27_/_0.6)]">DREAM CAR</span> TODAY
             </h1>
             <p className="mt-6 text-lg text-white/80 max-w-xl">
               Browse premium vehicles with flexible payment options tailored to your budget. Drive home today.
