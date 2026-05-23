@@ -41,6 +41,12 @@ function Index() {
         className="relative overflow-hidden text-white"
         style={{ background: "var(--gradient-hero)" }}
       >
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-no-repeat bg-bottom bg-cover opacity-30 md:opacity-40 mix-blend-luminosity pointer-events-none"
+          style={{ backgroundImage: `url(${heroCars})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent pointer-events-none" />
         <div className="container mx-auto px-4 py-20 md:py-32 relative">
           <div className="max-w-3xl">
             <Badge className="mb-5 bg-white/10 text-white hover:bg-white/15 border-0">Trusted dealership</Badge>
@@ -54,9 +60,6 @@ function Index() {
               <Button size="lg" asChild className="shadow-[var(--shadow-glow)]">
                 <a href="#cars">Browse Cars <ArrowRight className="ml-2 h-4 w-4" /></a>
               </Button>
-              {/* <Button size="lg" variant="outline" className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white" asChild>
-                <a href="#why">Why Eric</a>
-              </Button> */}
             </div>
           </div>
         </div>
