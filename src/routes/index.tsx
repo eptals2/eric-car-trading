@@ -12,6 +12,8 @@ import { PHP } from "@/lib/format";
 import type { Tables } from "@/integrations/supabase/types";
 import { ArrowRight, ShieldCheck, Banknote, Wrench } from "lucide-react";
 
+import heroCars from "@/assets/hero-cars.png";
+
 type Car = Tables<"cars">;
 
 export const Route = createFileRoute("/")({ component: Index });
@@ -39,22 +41,25 @@ function Index() {
         className="relative overflow-hidden text-white"
         style={{ background: "var(--gradient-hero)" }}
       >
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-no-repeat bg-bottom bg-cover opacity-30 md:opacity-40 mix-blend-luminosity pointer-events-none"
+          style={{ backgroundImage: `url(${heroCars})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent pointer-events-none" />
         <div className="container mx-auto px-4 py-20 md:py-32 relative">
           <div className="max-w-3xl">
             <Badge className="mb-5 bg-white/10 text-white hover:bg-white/15 border-0">Trusted dealership</Badge>
             <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">
-              FIND YOUR<br /><span className="text-primary-foreground/95 [text-shadow:0_0_40px_oklch(0.65_0.24_27_/_0.6)]">DREAM CAR</span> TODAY
+              GET YOUR<br /><span className="text-primary-foreground/95 [text-shadow:0_0_40px_oklch(0.65_0.24_27_/_0.6)]">DREAM CAR</span> TODAY
             </h1>
             <p className="mt-6 text-lg text-white/80 max-w-xl">
               Browse premium vehicles with flexible payment options tailored to your budget. Drive home today.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button size="lg" asChild className="shadow-[var(--shadow-glow)]">
-                <a href="#cars">Browse Cars <ArrowRight className="ml-2 h-4 w-4" /></a>
+                <a href="#cars">Get now<ArrowRight className="ml-2 h-4 w-4" /></a>
               </Button>
-              {/* <Button size="lg" variant="outline" className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white" asChild>
-                <a href="#why">Why Eric</a>
-              </Button> */}
             </div>
           </div>
         </div>
@@ -128,7 +133,7 @@ function Index() {
                   <h3 className="font-display text-xl">{c.name}</h3>
                   <div className="mt-1 text-2xl font-semibold text-primary">{PHP(Number(c.price))}</div>
                   <Button className="mt-4 w-full" variant="secondary" onClick={() => setSelected(c)}>
-                    View Details
+                    Get this
                   </Button>
                 </div>
               </article>
