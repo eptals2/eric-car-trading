@@ -12,6 +12,8 @@ import { PHP } from "@/lib/format";
 import type { Tables } from "@/integrations/supabase/types";
 import { ArrowRight, ShieldCheck, Banknote, Wrench } from "lucide-react";
 
+import heroCars from "@/assets/hero-cars.png";
+
 type Car = Tables<"cars">;
 
 export const Route = createFileRoute("/")({ component: Index });
