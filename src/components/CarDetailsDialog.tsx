@@ -23,8 +23,9 @@ const inquirySchema = z.object({
 
 export function CarDetailsDialog({ car, open, onOpenChange }: { car: Car | null; open: boolean; onOpenChange: (v: boolean) => void }) {
   const price = car?.price ? Number(car.price) : 0;
-  const minDp = Math.round(price * 0.1);
+  const minDp = Math.round(price * 0.106388);
   const maxDp = Math.round(price * 0.6);
+  const addOnRate = 0.2953
 
   const [downpayment, setDownpayment] = useState(minDp);
   const [years, setYears] = useState(3);
@@ -37,8 +38,10 @@ export function CarDetailsDialog({ car, open, onOpenChange }: { car: Car | null;
 
   const monthly = useMemo(() => {
     if (!price) return 0;
-    return Math.max(0, Math.round((price - downpayment) / (years * 12)));
-  }, [price, downpayment, years]);
+    const amountFinanced = price - downpayment;
+    const totalAmount = amountFinanced * (1 + addOnRate * years);
+    return Math.max(0, Math.round(totalAmount / (years * 12)));
+  }, [price, downpayment, years, addOnRate]);
 
   if (!car) return null;
   const outOfStock = car.status === "out_of_stock";
@@ -75,7 +78,7 @@ export function CarDetailsDialog({ car, open, onOpenChange }: { car: Car | null;
                     <Label>Downpayment</Label>
                     <span className="font-semibold">{PHP(downpayment)}</span>
                   </div>
-                  <Slider value={[downpayment]} min={minDp} max={maxDp} step={5000} onValueChange={(v) => setDownpayment(v[0])} />
+                  <Slider value={[downpayment]} min={minDp} max={maxDp} step={1000} onValueChange={(v) => setDownpayment(v[0])} />
                 </div>
 
                 <div>
@@ -89,7 +92,7 @@ export function CarDetailsDialog({ car, open, onOpenChange }: { car: Car | null;
                 <div className="rounded-md bg-primary/10 p-3 text-center">
                   <div className="text-xs uppercase tracking-widest text-muted-foreground">Monthly Payment</div>
                   <div className="font-display text-2xl text-primary">{PHP(monthly)}/mo</div>
-                  <div className="text-xs">Note: Price, Down Payment and Monthly Payment may change without prior notice.</div>
+                  <div className="text-xs">Note: <strong>Price, Down Payment and Monthly Payment</strong> are only <strong>estimates</strong>, actual costs will be based on <strong>financing's calculation</strong> and may change without prior notice.</div>
                 </div>
               </div>
             </div>
