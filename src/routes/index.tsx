@@ -58,7 +58,7 @@ function Index() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button size="lg" asChild className="shadow-[var(--shadow-glow)]">
-                <a href="#cars">Browse Cars <ArrowRight className="ml-2 h-4 w-4" /></a>
+                <a href="#cars">Get now<ArrowRight className="ml-2 h-4 w-4" /></a>
               </Button>
             </div>
           </div>
@@ -133,7 +133,7 @@ function Index() {
                   <h3 className="font-display text-xl">{c.name}</h3>
                   <div className="mt-1 text-2xl font-semibold text-primary">{PHP(Number(c.price))}</div>
                   <Button className="mt-4 w-full" variant="secondary" onClick={() => setSelected(c)}>
-                    View Details
+                    Get this
                   </Button>
                 </div>
               </article>
