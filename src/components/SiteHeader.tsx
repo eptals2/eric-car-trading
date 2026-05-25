@@ -17,7 +17,7 @@ export function SiteHeader() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center">
-            <img src="src/assets/eric-car-trading-logo.png" alt="Eric Car Trading" className="h-10 w-10 object-contain" />
+            <img src="eric-car-trading-logo.png" alt="Eric Car Trading" className="h-10 w-10 object-contain" />
           </div>
           <div className="leading-tight">
             <div className="font-display text-xl tracking-wide">ERIC CAR TRADING</div>

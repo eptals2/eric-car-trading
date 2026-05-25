@@ -23,7 +23,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Eric Car Trading — Find Your Dream Car Today" },
+      { title: "Eric Car Trading — Get Your Dream Car Today" },
       { name: "description", content: "Browse quality cars with flexible payment options at Eric Car Trading." },
     ],
     links: [
