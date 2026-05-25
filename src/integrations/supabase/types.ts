@@ -20,6 +20,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          images: string[]
           name: string
           price: number
           status: Database["public"]["Enums"]["car_status"]
@@ -30,6 +31,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          images?: string[]
           name: string
           price: number
           status?: Database["public"]["Enums"]["car_status"]
@@ -40,6 +42,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          images?: string[]
           name?: string
           price?: number
           status?: Database["public"]["Enums"]["car_status"]
