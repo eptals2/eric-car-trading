@@ -121,13 +121,31 @@ function Index() {
             }).map((c) => (
               <article key={c.id} className="group overflow-hidden rounded-lg border bg-card shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-glow)]">
                 <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                  {c.image_url ? (
-                    <img src={c.image_url} alt={c.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-muted-foreground">No image</div>
-                  )}
+                  {(() => {
+                    const imgs = (c.images && c.images.length > 0) ? c.images : (c.image_url ? [c.image_url] : []);
+                    if (imgs.length === 0) {
+                      return <div className="flex h-full items-center justify-center text-muted-foreground">No image</div>;
+                    }
+                    if (imgs.length === 1) {
+                      return <img src={imgs[0]} alt={c.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />;
+                    }
+                    return (
+                      <Carousel className="h-full w-full" opts={{ loop: true }}>
+                        <CarouselContent className="h-full ml-0">
+                          {imgs.map((src, i) => (
+                            <CarouselItem key={i} className="pl-0 h-full">
+                              <img src={src} alt={`${c.name} ${i + 1}`} className="h-full w-full aspect-[4/3] object-cover" loading="lazy" />
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="left-2" />
+                        <CarouselNext className="right-2" />
+                        <div className="absolute bottom-2 right-2 rounded bg-black/60 text-white text-xs px-2 py-0.5">{imgs.length} photos</div>
+                      </Carousel>
+                    );
+                  })()}
                   {c.status === "out_of_stock" && (
-                    <Badge variant="destructive" className="absolute top-3 left-3">Out of Stock</Badge>
+                    <Badge variant="destructive" className="absolute top-3 left-3 z-10">Out of Stock</Badge>
                   )}
                 </div>
                 <div className="p-5">
