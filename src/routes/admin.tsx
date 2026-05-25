@@ -181,7 +181,22 @@ function AdminPage() {
 
 function CarFormDialog({ car, onSaved }: { car: Car | null; onSaved: () => void }) {
   const [saving, setSaving] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>(
+    (car?.images && car.images.length > 0)
+      ? car.images
+      : car?.image_url ? [car.image_url] : []
+  );
+
+  const totalCount = existingImages.length + imageFiles.length;
+
+  function onFilesPicked(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = Array.from(e.target.files ?? []);
+    const allowed = Math.max(0, 5 - existingImages.length - imageFiles.length);
+    if (picked.length > allowed) toast.error(`You can only add ${allowed} more image(s). Max 5 per car.`);
+    setImageFiles((prev) => [...prev, ...picked.slice(0, allowed)]);
+    e.target.value = "";
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -190,18 +205,22 @@ function CarFormDialog({ car, onSaved }: { car: Car | null; onSaved: () => void 
     const price = Number(fd.get("price"));
     const description = String(fd.get("description") || "");
     if (!name || !price) { toast.error("Name and price required"); return; }
+    if (existingImages.length + imageFiles.length > 5) { toast.error("Max 5 images per car"); return; }
     setSaving(true);
 
-    let image_url = car?.image_url ?? null;
-    if (imageFile) {
-      const ext = imageFile.name.split(".").pop();
+    const uploadedUrls: string[] = [];
+    for (const file of imageFiles) {
+      const ext = file.name.split(".").pop();
       const path = `${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("car-images").upload(path, imageFile);
+      const { error: upErr } = await supabase.storage.from("car-images").upload(path, file);
       if (upErr) { toast.error(upErr.message); setSaving(false); return; }
-      image_url = supabase.storage.from("car-images").getPublicUrl(path).data.publicUrl;
+      uploadedUrls.push(supabase.storage.from("car-images").getPublicUrl(path).data.publicUrl);
     }
 
-    const payload = { name, price, description, image_url };
+    const images = [...existingImages, ...uploadedUrls];
+    const image_url = images[0] ?? null;
+
+    const payload = { name, price, description, image_url, images };
     const { error } = car
       ? await supabase.from("cars").update(payload).eq("id", car.id)
       : await supabase.from("cars").insert(payload);
@@ -212,7 +231,7 @@ function CarFormDialog({ car, onSaved }: { car: Car | null; onSaved: () => void 
   }
 
   return (
-    <DialogContent>
+    <DialogContent className="max-h-[90vh] overflow-y-auto">
       <DialogHeader><DialogTitle className="font-display text-2xl">{car ? "Edit Car" : "Add New Car"}</DialogTitle></DialogHeader>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
@@ -228,9 +247,41 @@ function CarFormDialog({ car, onSaved }: { car: Car | null; onSaved: () => void 
           <Textarea id="description" name="description" defaultValue={car?.description ?? ""} maxLength={500} />
         </div>
         <div>
-          <Label htmlFor="image">Image {car?.image_url && "(replace)"}</Label>
-          <Input id="image" name="image" type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
-          {car?.image_url && !imageFile && <img src={car.image_url} alt="" className="mt-2 h-24 rounded object-cover" />}
+          <Label htmlFor="image">Images ({totalCount}/5)</Label>
+          <Input
+            id="image"
+            name="image"
+            type="file"
+            accept="image/*"
+            multiple
+            disabled={totalCount >= 5}
+            onChange={onFilesPicked}
+          />
+          <p className="text-xs text-muted-foreground mt-1">Upload up to 5 photos. The first one is used as the cover.</p>
+          {(existingImages.length > 0 || imageFiles.length > 0) && (
+            <div className="mt-3 grid grid-cols-5 gap-2">
+              {existingImages.map((url, i) => (
+                <div key={`e-${i}`} className="relative">
+                  <img src={url} alt="" className="h-20 w-full rounded object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setExistingImages((prev) => prev.filter((_, idx) => idx !== i))}
+                    className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full h-5 w-5 text-xs leading-none"
+                  >×</button>
+                </div>
+              ))}
+              {imageFiles.map((file, i) => (
+                <div key={`n-${i}`} className="relative">
+                  <img src={URL.createObjectURL(file)} alt="" className="h-20 w-full rounded object-cover ring-2 ring-primary" />
+                  <button
+                    type="button"
+                    onClick={() => setImageFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                    className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full h-5 w-5 text-xs leading-none"
+                  >×</button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <Button type="submit" className="w-full" disabled={saving}>{saving ? "Saving..." : car ? "Update Car" : "Add Car"}</Button>
       </form>

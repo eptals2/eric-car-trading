@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { PHP } from "@/lib/format";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -55,12 +56,29 @@ export function CarDetailsDialog({ car, open, onOpenChange }: { car: Car | null;
           </DialogHeader>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="overflow-hidden rounded-lg bg-muted">
-              {car.image_url ? (
-                <img src={car.image_url} alt={car.name} className="h-64 w-full object-cover md:h-full" />
-              ) : (
-                <div className="flex h-64 items-center justify-center text-muted-foreground">No image</div>
-              )}
+            <div className="overflow-hidden rounded-lg bg-muted relative">
+              {(() => {
+                const imgs = (car.images && car.images.length > 0) ? car.images : (car.image_url ? [car.image_url] : []);
+                if (imgs.length === 0) {
+                  return <div className="flex h-64 items-center justify-center text-muted-foreground">No image</div>;
+                }
+                if (imgs.length === 1) {
+                  return <img src={imgs[0]} alt={car.name} className="h-64 w-full object-cover md:h-full" />;
+                }
+                return (
+                  <Carousel className="h-full w-full" opts={{ loop: true }}>
+                    <CarouselContent className="ml-0">
+                      {imgs.map((src, i) => (
+                        <CarouselItem key={i} className="pl-0">
+                          <img src={src} alt={`${car.name} ${i + 1}`} className="h-64 w-full object-cover md:h-full" />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="left-2" />
+                    <CarouselNext className="right-2" />
+                  </Carousel>
+                );
+              })()}
             </div>
             <div className="space-y-4">
               <div>
