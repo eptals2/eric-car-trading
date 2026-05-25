@@ -33,7 +33,7 @@ function Index() {
   const [selected, setSelected] = useState<Car | null>(null);
   const [sort, setSort] = useState<"newest" | "price_asc" | "price_desc">("price_asc");
   const [page, setPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 9;
 
   useEffect(() => {
     supabase.from("cars").select("*").order("created_at", { ascending: false }).then(({ data }) => {
