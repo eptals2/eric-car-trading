@@ -23,16 +23,19 @@ function AuthPage() {
     setLoading(true);
 
     if (mode === "login") {
-      const { checkLoginRateLimit } = await import("@/lib/rate-limit.functions");
       try {
         const rl = await checkLoginRateLimit();
+        console.log("[rate-limit] result:", rl);
         if (!rl.allowed) {
           setLoading(false);
-          toast.error("Too many login attempts. Try again in a minute.");
+          toast.error(`Too many login attempts. Try again in ${rl.retryAfterSec ?? 60}s.`);
           return;
         }
       } catch (err) {
         console.error("rate limit check failed", err);
+        setLoading(false);
+        toast.error("Login temporarily unavailable. Please try again.");
+        return;
       }
     }
 
