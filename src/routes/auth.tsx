@@ -20,6 +20,21 @@ function AuthPage() {
     const email = String(fd.get("email"));
     const password = String(fd.get("password"));
     setLoading(true);
+
+    if (mode === "login") {
+      const { checkLoginRateLimit } = await import("@/lib/rate-limit.functions");
+      try {
+        const rl = await checkLoginRateLimit();
+        if (!rl.allowed) {
+          setLoading(false);
+          toast.error("Too many login attempts. Try again in a minute.");
+          return;
+        }
+      } catch (err) {
+        console.error("rate limit check failed", err);
+      }
+    }
+
     const { error } =
       mode === "login"
         ? await supabase.auth.signInWithPassword({ email, password })
@@ -29,6 +44,7 @@ function AuthPage() {
     toast.success(mode === "login" ? "Signed in" : "Account created");
     navigate({ to: "/admin" });
   }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4" style={{ background: "var(--gradient-hero)" }}>

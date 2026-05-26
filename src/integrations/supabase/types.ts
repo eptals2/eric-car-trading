@@ -97,6 +97,24 @@ export type Database = {
           },
         ]
       }
+      login_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          ip: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          ip: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          ip?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
