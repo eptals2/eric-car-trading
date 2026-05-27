@@ -8,9 +8,12 @@ const WINDOW_MS = 60_000;
 export const checkLoginRateLimit = createServerFn({ method: "POST" }).handler(
   async () => {
     const ip =
-      getRequestIP({ xForwardedFor: true }) ||
+      getRequestHeader("cf-connecting-ip") ||
+      getRequestHeader("x-real-ip") ||
       getRequestHeader("x-forwarded-for")?.split(",")[0]?.trim() ||
+      getRequestIP({ xForwardedFor: true }) ||
       "unknown";
+    console.log("[rate-limit] checking ip:", ip);
 
     const since = new Date(Date.now() - WINDOW_MS).toISOString();
 
