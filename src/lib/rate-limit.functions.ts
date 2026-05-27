@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestIP, getRequestHeader } from "@tanstack/react-start/server";
 import { supabase } from "@/integrations/supabase/client";
 
-const LIMIT = 5;
+const LIMIT = 3;
 const WINDOW_MS = 60_000;
 
 type RateLimitResult = {
