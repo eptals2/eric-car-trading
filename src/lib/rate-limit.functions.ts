@@ -1,9 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestIP, getRequestHeader } from "@tanstack/react-start/server";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { supabase } from "@/integrations/supabase/client";
 
-const LIMIT = 5;
+const LIMIT = 3;
 const WINDOW_MS = 60_000;
+
+type RateLimitResult = {
+  allowed: boolean;
+  remaining: number;
+  retryAfterSec?: number;
+};
 
 export const checkLoginRateLimit = createServerFn({ method: "POST" }).handler(
   async () => {
@@ -15,35 +21,17 @@ export const checkLoginRateLimit = createServerFn({ method: "POST" }).handler(
       "unknown";
     console.log("[rate-limit] checking ip:", ip);
 
-    const since = new Date(Date.now() - WINDOW_MS).toISOString();
+    const { data, error } = await supabase.rpc("check_login_rate_limit", {
+      _ip: ip,
+      _limit: LIMIT,
+      _window_seconds: Math.floor(WINDOW_MS / 1000),
+    });
 
-    const { count, error: countErr } = await supabaseAdmin
-      .from("login_attempts")
-      .select("*", { count: "exact", head: true })
-      .eq("ip", ip)
-      .gte("attempted_at", since);
-
-    if (countErr) {
-      console.error("rate limit count error", countErr);
+    if (error) {
+      console.error("rate limit rpc error", error);
       return { allowed: true, remaining: LIMIT };
     }
 
-    if ((count ?? 0) >= LIMIT) {
-      return { allowed: false, remaining: 0, retryAfterSec: 60 };
-    }
-
-    const { error: insertErr } = await supabaseAdmin
-      .from("login_attempts")
-      .insert({ ip });
-    if (insertErr) console.error("rate limit insert error", insertErr);
-
-    // Best-effort cleanup of old rows for this IP.
-    void supabaseAdmin
-      .from("login_attempts")
-      .delete()
-      .eq("ip", ip)
-      .lt("attempted_at", since);
-
-    return { allowed: true, remaining: LIMIT - ((count ?? 0) + 1) };
+    return data as RateLimitResult;
   },
 );
