@@ -141,6 +141,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_login_rate_limit: {
+        Args: { _ip: string; _limit?: number; _window_seconds?: number }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
