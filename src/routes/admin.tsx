@@ -145,6 +145,13 @@ function AdminPage() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  {cars.filter((c) => c.name.toLowerCase().includes(carSearch.trim().toLowerCase())).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                        No cars match your search.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
