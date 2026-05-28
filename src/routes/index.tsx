@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import {
@@ -19,7 +20,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { CarDetailsDialog } from "@/components/CarDetailsDialog";
 import { PHP } from "@/lib/format";
 import type { Tables } from "@/integrations/supabase/types";
-import { ArrowRight, ShieldCheck, Banknote, Wrench } from "lucide-react";
+import { ArrowRight, ShieldCheck, Banknote, Wrench, Search } from "lucide-react";
 
 import heroCars from "@/assets/hero-cars.png";
 
@@ -33,6 +34,7 @@ function Index() {
   const [selected, setSelected] = useState<Car | null>(null);
   const [sort, setSort] = useState<"newest" | "price_asc" | "price_desc">("price_asc");
   const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
   const ITEMS_PER_PAGE = 9;
 
   useEffect(() => {
@@ -101,7 +103,16 @@ function Index() {
             <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">The Lineup</div>
             <h2 className="font-display text-4xl md:text-5xl">Available Cars</h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search cars..."
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+                className="pl-9 w-[220px]"
+              />
+            </div>
             <span className="text-sm text-muted-foreground hidden sm:block">{cars.length} units</span>
             <Select value={sort} onValueChange={(v) => { setSort(v as typeof sort); setPage(1); }}>
               <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
@@ -115,7 +126,10 @@ function Index() {
         </div>
 
         {(() => {
-          const sortedCars = [...cars].sort((a, b) => {
+          const filteredCars = cars.filter((c) =>
+            c.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+          );
+          const sortedCars = [...filteredCars].sort((a, b) => {
             if (sort === "price_asc") return Number(a.price) - Number(b.price);
             if (sort === "price_desc") return Number(b.price) - Number(a.price);
             return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
