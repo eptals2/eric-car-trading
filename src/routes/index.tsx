@@ -102,7 +102,16 @@ function Index() {
             <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">The Lineup</div>
             <h2 className="font-display text-4xl md:text-5xl">Available Cars</h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search cars..."
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+                className="pl-9 w-[220px]"
+              />
+            </div>
             <span className="text-sm text-muted-foreground hidden sm:block">{cars.length} units</span>
             <Select value={sort} onValueChange={(v) => { setSort(v as typeof sort); setPage(1); }}>
               <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
@@ -116,7 +125,10 @@ function Index() {
         </div>
 
         {(() => {
-          const sortedCars = [...cars].sort((a, b) => {
+          const filteredCars = cars.filter((c) =>
+            c.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+          );
+          const sortedCars = [...filteredCars].sort((a, b) => {
             if (sort === "price_asc") return Number(a.price) - Number(b.price);
             if (sort === "price_desc") return Number(b.price) - Number(a.price);
             return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
