@@ -28,6 +28,7 @@ function AdminPage() {
   const [inquiries, setInquiries] = useState<(Inquiry & { cars: { name: string } | null })[]>([]);
   const [editing, setEditing] = useState<Car | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [carSearch, setCarSearch] = useState("");
 
   const refresh = useCallback(async () => {
     const [{ data: c }, { data: i }] = await Promise.all([
