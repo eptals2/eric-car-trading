@@ -85,7 +85,7 @@ function AdminPage() {
 
         <Tabs defaultValue="cars">
           <TabsList>
-            <TabsTrigger value="cars">Cars ({cars.length})</TabsTrigger>
+            <TabsTrigger value="cars">Cars ({cars.filter((c) => c.name.toLowerCase().includes(carSearch.trim().toLowerCase())).length} / {cars.length})</TabsTrigger>
             <TabsTrigger value="inquiries">Inquiries ({inquiries.length})</TabsTrigger>
           </TabsList>
 
@@ -120,7 +120,9 @@ function AdminPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {cars.map((c) => (
+                  {cars
+                    .filter((c) => c.name.toLowerCase().includes(carSearch.trim().toLowerCase()))
+                    .map((c) => (
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">{c.name}</TableCell>
                       <TableCell>{PHP(Number(c.price))}</TableCell>
