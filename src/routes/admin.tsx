@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { SiteHeader } from "@/components/SiteHeader";
 import { PHP } from "@/lib/format";
 import { toast } from "sonner";
-import { Plus, Pencil, LogOut } from "lucide-react";
+import { Plus, Pencil, LogOut, Search } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Car = Tables<"cars">;

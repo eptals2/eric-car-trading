@@ -19,7 +19,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { CarDetailsDialog } from "@/components/CarDetailsDialog";
 import { PHP } from "@/lib/format";
 import type { Tables } from "@/integrations/supabase/types";
-import { ArrowRight, ShieldCheck, Banknote, Wrench } from "lucide-react";
+import { ArrowRight, ShieldCheck, Banknote, Wrench, Search } from "lucide-react";
 
 import heroCars from "@/assets/hero-cars.png";
 
