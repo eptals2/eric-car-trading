@@ -90,7 +90,16 @@ function AdminPage() {
           </TabsList>
 
           <TabsContent value="cars" className="mt-6">
-            <div className="flex justify-end mb-4">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search cars..."
+                  value={carSearch}
+                  onChange={(e) => setCarSearch(e.target.value)}
+                  className="pl-9 w-[220px]"
+                />
+              </div>
               <Dialog open={dialogOpen} onOpenChange={(v) => { setDialogOpen(v); if (!v) setEditing(null); }}>
                 <DialogTrigger asChild>
                   <Button onClick={() => { setEditing(null); setDialogOpen(true); }}>
