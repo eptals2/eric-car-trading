@@ -97,6 +97,24 @@ export type Database = {
           },
         ]
       }
+      login_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          ip: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          ip: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          ip?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -123,6 +141,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_login_rate_limit: {
+        Args: { _ip: string; _limit?: number; _window_seconds?: number }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
