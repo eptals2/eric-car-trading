@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { SiteHeader } from "@/components/SiteHeader";
 import { PHP } from "@/lib/format";
 import { toast } from "sonner";
-import { Plus, Pencil, LogOut } from "lucide-react";
+import { Plus, Pencil, LogOut, Search } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Car = Tables<"cars">;
@@ -28,6 +28,7 @@ function AdminPage() {
   const [inquiries, setInquiries] = useState<(Inquiry & { cars: { name: string } | null })[]>([]);
   const [editing, setEditing] = useState<Car | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [carSearch, setCarSearch] = useState("");
 
   const refresh = useCallback(async () => {
     const [{ data: c }, { data: i }] = await Promise.all([
@@ -84,12 +85,21 @@ function AdminPage() {
 
         <Tabs defaultValue="cars">
           <TabsList>
-            <TabsTrigger value="cars">Cars ({cars.length})</TabsTrigger>
+            <TabsTrigger value="cars">Cars ({cars.filter((c) => c.name.toLowerCase().includes(carSearch.trim().toLowerCase())).length} / {cars.length})</TabsTrigger>
             <TabsTrigger value="inquiries">Inquiries ({inquiries.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="cars" className="mt-6">
-            <div className="flex justify-end mb-4">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search cars..."
+                  value={carSearch}
+                  onChange={(e) => setCarSearch(e.target.value)}
+                  className="pl-9 w-[220px]"
+                />
+              </div>
               <Dialog open={dialogOpen} onOpenChange={(v) => { setDialogOpen(v); if (!v) setEditing(null); }}>
                 <DialogTrigger asChild>
                   <Button onClick={() => { setEditing(null); setDialogOpen(true); }}>
@@ -110,7 +120,9 @@ function AdminPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {cars.map((c) => (
+                  {cars
+                    .filter((c) => c.name.toLowerCase().includes(carSearch.trim().toLowerCase()))
+                    .map((c) => (
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">{c.name}</TableCell>
                       <TableCell>{PHP(Number(c.price))}</TableCell>
@@ -133,6 +145,13 @@ function AdminPage() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  {cars.filter((c) => c.name.toLowerCase().includes(carSearch.trim().toLowerCase())).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                        No cars match your search.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
