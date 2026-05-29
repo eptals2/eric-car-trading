@@ -1,3 +1,5 @@
+import { FeedbackForm } from "./FeedbackForm";
+
 const socialLinks = [
   {
     name: "Facebook",
@@ -61,7 +63,21 @@ export function SiteFooter() {
             ))}
           </div>
         </div>
+        <div className="md:col-span-2">
+          <iframe
+            title="Store Location"
+            width="100%"
+            height="400"
+            loading="lazy"
+            allowFullScreen
+            src="https://www.google.com/maps?q=8.942120459907484,125.49826921743616&z=16&output=embed"
+          />
+        </div>
+        <div className="md:col-span-2">
+          <FeedbackForm />
+        </div>
       </div>
+
       <div className="py-2 text-center text-xs text-secondary-foreground/50">
         Powered by Goytech
       </div>
