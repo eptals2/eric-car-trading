@@ -62,6 +62,15 @@ export function SiteFooter() {
           </div>
         </div>
       </div>
+      <iframe
+        title="Store Location"
+        width="50%"
+        height="300"
+        style={{ border: 0, borderRadius: "8px", margin: "0 auto", display: "flex", marginBottom: "2rem" }}
+        loading="lazy"
+        allowFullScreen
+        src="https://www.google.com/maps?q=8.942120459907484,125.49826921743616&z=16&output=embed"
+      />
       <div className="py-2 text-center text-xs text-secondary-foreground/50">
         Powered by Goytech
       </div>
