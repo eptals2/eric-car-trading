@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { z } from "zod";
+import { number, z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ export function CarDetailsDialog({ car, open, onOpenChange }: { car: Car | null;
   const price = car?.price ? Number(car.price) : 0;
   const minDp = Math.round(price * 0.106388);
   const maxDp = Math.round(price * 0.6);
-  const addOnRate = 0.2953
+  const addOnRate = 0.3067
 
   const [downpayment, setDownpayment] = useState(minDp);
   const [years, setYears] = useState(3);
@@ -96,7 +96,10 @@ export function CarDetailsDialog({ car, open, onOpenChange }: { car: Car | null;
                     <Label>Downpayment</Label>
                     <span className="font-semibold">{PHP(downpayment)}</span>
                   </div>
-                  <Slider value={[downpayment]} min={minDp} max={maxDp} step={1000} onValueChange={(v) => setDownpayment(v[0])} />
+                  <div className="space-y-2">
+                    <Input type="number" placeholder="Input Downpayment" value={downpayment.toString()} min={minDp} max={maxDp} onChange={(e) => setDownpayment(parseInt(e.target.value))} />
+                    <Slider value={[downpayment]} min={minDp} max={maxDp} step={1000} onValueChange={(v) => setDownpayment(v[0])} />
+                  </div>
                 </div>
 
                 <div>
