@@ -32,7 +32,7 @@ function AdminPage() {
 
   const refresh = useCallback(async () => {
     const [{ data: c }, { data: i }] = await Promise.all([
-      supabase.from("cars").select("*").order("created_at", { ascending: false }),
+      supabase.from("cars").select("*").order("price", { ascending: true }),
       supabase.from("inquiries").select("*, cars(name)").order("created_at", { ascending: false }),
     ]);
     setCars(c ?? []);
