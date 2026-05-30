@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { useCars } from "@/hooks/use-Cars";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -25,24 +25,13 @@ import { ArrowRight, ShieldCheck, Banknote, Wrench, Search } from "lucide-react"
 import heroCars from "@/assets/hero-cars.png";
 
 type Car = Tables<"cars">;
+type SortOption = "price_asc" | "price_desc";
 
 export const Route = createFileRoute("/")({ component: Index });
 
 function Index() {
-  const [cars, setCars] = useState<Car[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Car | null>(null);
-  const [sort, setSort] = useState<"newest" | "price_asc" | "price_desc">("price_asc");
-  const [page, setPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
-  const ITEMS_PER_PAGE = 9;
-
-  useEffect(() => {
-    supabase.from("cars").select("*").order("price", { ascending: true }).then(({ data }) => {
-      setCars(data ?? []);
-      setLoading(false);
-    });
-  }, []);
+  const { cars, loading, totalCount, totalPages, sort, page, searchQuery, setPage, handleSearch, handleSort } = useCars();
 
   return (
     <div className="min-h-screen bg-background">
@@ -109,131 +98,94 @@ function Index() {
               <Input
                 placeholder="Search cars..."
                 value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+                onChange={(e) => { handleSearch(e.target.value); }}
                 className="pl-9 w-[220px]"
               />
             </div>
-            <span className="text-sm text-muted-foreground hidden sm:block">{cars.length} units</span>
-            <Select value={sort} onValueChange={(v) => { setSort(v as typeof sort); setPage(1); }}>
+            <span className="text-sm text-muted-foreground hidden sm:block">{totalCount} units</span>
+            <Select value={sort}
+              onValueChange={(v) => { handleSort(v as SortOption); }}>
               <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {/* <SelectItem value="newest">Newest</SelectItem> */}
+                <SelectItem value="newest">Newest</SelectItem>
                 <SelectItem value="price_asc">Price: Low to High</SelectItem>
                 <SelectItem value="price_desc">Price: High to Low</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
-
-        {(() => {
-          const filteredCars = cars.filter((c) =>
-            c.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
-          );
-          const sortedCars = [...filteredCars].sort((a, b) => {
-            if (sort === "price_asc") return Number(a.price) - Number(b.price);
-            if (sort === "price_desc") return Number(b.price) - Number(a.price);
-            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-          });
-          const totalPages = Math.max(1, Math.ceil(sortedCars.length / ITEMS_PER_PAGE));
-          const currentPage = Math.min(page, totalPages);
-          const paginatedCars = sortedCars.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-
-          return (
-            <>
-              {loading ? (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <Card key={i} className="h-[380px] animate-pulse bg-muted" />
-                  ))}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <div className="h-40 bg-muted" />
+                <div className="p-4">
+                  <div className="h-4 bg-muted w-3/4 mb-2" />
+                  <div className="h-3 bg-muted w-1/2" />
                 </div>
-              ) : cars.length === 0 ? (
-                <p className="text-center py-12 text-muted-foreground">No cars listed yet.</p>
-              ) : (
-                <>
-                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {paginatedCars.map((c) => (
-                      <article key={c.id} className="group overflow-hidden rounded-lg border bg-card shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-glow)]">
-                        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                          {(() => {
-                            const imgs = (c.images && c.images.length > 0) ? c.images : (c.image_url ? [c.image_url] : []);
-                            if (imgs.length === 0) {
-                              return <div className="flex h-full items-center justify-center text-muted-foreground">No image</div>;
-                            }
-                            if (imgs.length === 1) {
-                              return <img src={imgs[0]} alt={c.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />;
-                            }
-                            return (
-                              <Carousel className="h-full w-full" opts={{ loop: true }}>
-                                <CarouselContent className="h-full ml-0">
-                                  {imgs.map((src, i) => (
-                                    <CarouselItem key={i} className="pl-0 h-full">
-                                      <img src={src} alt={`${c.name} ${i + 1}`} className="h-full w-full aspect-[4/3] object-cover" loading="lazy" />
-                                    </CarouselItem>
-                                  ))}
-                                </CarouselContent>
-                                <CarouselPrevious className="left-2" />
-                                <CarouselNext className="right-2" />
-                                <div className="absolute bottom-2 right-2 rounded bg-black/60 text-white text-xs px-2 py-0.5">{imgs.length} photos</div>
-                              </Carousel>
-                            );
-                          })()}
-                          {c.status === "out_of_stock" && (
-                            <Badge variant="destructive" className="absolute top-3 left-3 z-10">Out of Stock</Badge>
-                          )}
-                        </div>
-                        <div className="p-5">
-                          <h3 className="font-display text-xl">{c.name}</h3>
-                          <div className="mt-1 text-2xl font-semibold text-primary">{PHP(Number(c.price))}</div>
-                          <Button className="mt-4 w-full" variant="secondary" onClick={() => setSelected(c)}>
-                            Get this
-                          </Button>
-                        </div>
-                      </article>
+              </Card>
+            ))
+          ) : (
+            cars.map((car) => (
+              <Card key={car.id} className="cursor-pointer" onClick={() => setSelected(car)}>
+                <img src={car.image_url ?? undefined} alt={car.name} className="h-120 w-full" />
+                <Carousel className="h-full w-full" opts={{ loop: true }}>
+                  <CarouselContent className="h-full ml-0">
+                    {car.images?.map((src, i) => (
+                      <CarouselItem key={i} className="pl-0 h-full">
+                        <img src={src} alt={`${car.name} ${i + 1}`} className="h-full w-full aspect-[4/3] object-cover" loading="lazy" />
+                      </CarouselItem>
                     ))}
-                  </div>
-
-                  {totalPages > 1 && (
-                    <div className="mt-10 flex justify-center">
-                      <Pagination>
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious
-                              href="#cars"
-                              onClick={(e) => { e.preventDefault(); setPage((p) => Math.max(1, p - 1)); }}
-                              className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                            />
-                          </PaginationItem>
-                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                            <PaginationItem key={p}>
-                              <PaginationLink
-                                href="#cars"
-                                onClick={(e) => { e.preventDefault(); setPage(p); }}
-                                isActive={p === currentPage}
-                              >
-                                {p}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ))}
-                          <PaginationItem>
-                            <PaginationNext
-                              href="#cars"
-                              onClick={(e) => { e.preventDefault(); setPage((p) => Math.min(totalPages, p + 1)); }}
-                              className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                            />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
-                    </div>
-                  )}
-                </>
-              )}
-            </>
-          );
-        })()}
+                  </CarouselContent>
+                  <CarouselPrevious className="left-2" />
+                  <CarouselNext className="right-2" />
+                  <div className="absolute bottom-2 right-2 rounded bg-black/60 text-white text-xs px-2 py-0.5">{car.images?.length || 0} photos</div>
+                </Carousel>
+                <div className="p-4">
+                  <h3 className="font-semibold">{car.name}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{PHP(car.price)}</p>
+                </div>
+              </Card>
+            ))
+          )}
+          {totalPages > 1 && (
+            <div className="mt-10 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#cars"
+                      onClick={(e) => { e.preventDefault(); setPage((p) => Math.max(1, p - 1)); }}
+                      className={page === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <PaginationItem key={p}>
+                      <PaginationLink
+                        href="#cars"
+                        onClick={(e) => { e.preventDefault(); setPage(p); }}
+                        isActive={p === page}
+                      >
+                        {p}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#cars"
+                      onClick={(e) => { e.preventDefault(); setPage((p) => Math.min(totalPages, p + 1)); }}
+                      className={page === totalPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </div>
       </section>
 
       <section id="contact">
-        <SiteFooter/>
+        <SiteFooter />
       </section>
       <CarDetailsDialog car={selected} open={!!selected} onOpenChange={(v) => !v && setSelected(null)} />
     </div>

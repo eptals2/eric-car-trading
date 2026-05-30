@@ -20,7 +20,7 @@ export function useCars() {
 
     useEffect(() => {
         clearTimeout(debounceRef.current!);
-        debounceRef.current = setTimeout(fetchCars, 400);
+        debounceRef.current = setTimeout(fetchCars, 600);
         return () => clearTimeout(debounceRef.current!);
     }, [page, sort, searchQuery]);
 
@@ -45,7 +45,7 @@ export function useCars() {
 
         const { data, count, error } = await query;
 
-        if (error) {
+        if (!error) {
             setCars(data ?? []);
             setTotalCount(count ?? 0);
         }
