@@ -38,7 +38,7 @@ function Index() {
   const ITEMS_PER_PAGE = 9;
 
   useEffect(() => {
-    supabase.from("cars").select("*").order("created_at", { ascending: false }).then(({ data }) => {
+    supabase.from("cars").select("*").order("price", { ascending: true }).then(({ data }) => {
       setCars(data ?? []);
       setLoading(false);
     });
