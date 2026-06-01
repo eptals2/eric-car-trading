@@ -50,6 +50,39 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          message: string | null
+          name: string
+          rating: number | null
+          subject: string | null
+          type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          message?: string | null
+          name: string
+          rating?: number | null
+          subject?: string | null
+          type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          message?: string | null
+          name?: string
+          rating?: number | null
+          subject?: string | null
+          type?: string | null
+        }
+        Relationships: []
+      }
       inquiries: {
         Row: {
           car_id: string | null
