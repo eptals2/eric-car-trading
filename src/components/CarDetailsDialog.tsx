@@ -97,7 +97,12 @@ export function CarDetailsDialog({ car, open, onOpenChange }: { car: Car | null;
                     <span className="font-semibold">{PHP(downpayment)}</span>
                   </div>
                   <div className="space-y-2">
-                    <Input type="number" placeholder="Input Downpayment" value={downpayment.toString()} min={minDp} max={maxDp} onChange={(e) => setDownpayment(parseInt(e.target.value))} />
+                    <Input type="number" placeholder="Input Downpayment" value={downpayment.toString()} min={minDp} max={maxDp} onChange={(e) => setDownpayment(parseInt(e.target.value) || 0)} />
+                    {downpayment < minDp && (
+                      <div className="text-xs font-medium text-destructive">
+                        DP is lower than minimum. Downpayment must be {PHP(minDp)}
+                      </div>
+                    )}
                     <Slider value={[downpayment]} min={minDp} max={maxDp} step={1000} onValueChange={(v) => setDownpayment(v[0])} />
                   </div>
                 </div>
@@ -120,8 +125,8 @@ export function CarDetailsDialog({ car, open, onOpenChange }: { car: Car | null;
           </div>
 
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button variant="outline" disabled={outOfStock} onClick={() => setFormOpen("quote")}>Get Free Quote</Button>
-            <Button disabled={outOfStock} onClick={() => setFormOpen("reserve")}>Reserve This Unit</Button>
+            <Button variant="outline" disabled={outOfStock || downpayment < minDp} onClick={() => setFormOpen("quote")}>Get Free Quote</Button>
+            <Button disabled={outOfStock || downpayment < minDp} onClick={() => setFormOpen("reserve")}>Reserve This Unit</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
