@@ -23,6 +23,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { ArrowRight, ShieldCheck, Banknote, Wrench, Search } from "lucide-react";
 
 import heroCars from "@/assets/hero-cars.png";
+import BrandMarquee from "@/components/BrandMarquee";
 
 type Car = Tables<"cars">;
 
@@ -94,6 +95,11 @@ function Index() {
             <p className="mt-1 text-sm text-muted-foreground">{d}</p>
           </div>
         ))}
+      </section>
+
+      {/* Brands */}
+      <section id="brands" className="container mx-auto px-4">
+        <BrandMarquee />
       </section>
 
       {/* Cars */}
@@ -233,7 +239,7 @@ function Index() {
       </section>
 
       <section id="contact">
-        <SiteFooter/>
+        <SiteFooter />
       </section>
       <CarDetailsDialog car={selected} open={!!selected} onOpenChange={(v) => !v && setSelected(null)} />
     </div>
