@@ -148,6 +148,80 @@ export type Database = {
         }
         Relationships: []
       }
+      made_to_order_designs: {
+        Row: {
+          category: Database["public"]["Enums"]["mto_category"]
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["mto_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["mto_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      made_to_order_inquiries: {
+        Row: {
+          category: Database["public"]["Enums"]["mto_category"]
+          contact_number: string
+          created_at: string
+          design_id: string | null
+          design_name: string | null
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["mto_category"]
+          contact_number: string
+          created_at?: string
+          design_id?: string | null
+          design_name?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["mto_category"]
+          contact_number?: string
+          created_at?: string
+          design_id?: string | null
+          design_name?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "made_to_order_inquiries_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "made_to_order_designs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -189,6 +263,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       car_status: "available" | "out_of_stock"
+      mto_category: "minivan" | "minitruck"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -318,6 +393,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user"],
       car_status: ["available", "out_of_stock"],
+      mto_category: ["minivan", "minitruck"],
     },
   },
 } as const
