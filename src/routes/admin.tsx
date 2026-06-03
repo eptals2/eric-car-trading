@@ -17,6 +17,8 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type Car = Tables<"cars">;
 type Inquiry = Tables<"inquiries">;
+type MtoDesign = Tables<"made_to_order_designs">;
+type MtoInquiry = Tables<"made_to_order_inquiries">;
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
 
