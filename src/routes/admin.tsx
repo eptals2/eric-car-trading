@@ -97,6 +97,8 @@ function AdminPage() {
           <TabsList>
             <TabsTrigger value="cars">Cars ({cars.filter((c) => c.name.toLowerCase().includes(carSearch.trim().toLowerCase())).length} / {cars.length})</TabsTrigger>
             <TabsTrigger value="inquiries">Inquiries ({inquiries.length})</TabsTrigger>
+            <TabsTrigger value="mto-designs">MTO Designs ({mtoDesigns.length})</TabsTrigger>
+            <TabsTrigger value="mto-inquiries">MTO Inquiries ({mtoInquiries.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="cars" className="mt-6">
