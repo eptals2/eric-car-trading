@@ -204,6 +204,86 @@ function AdminPage() {
               </Table>
             </div>
           </TabsContent>
+
+          <TabsContent value="mto-designs" className="mt-6">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+              <p className="text-sm text-muted-foreground">Manage made-to-order minivan and minitruck designs.</p>
+              <Dialog open={mtoDialogOpen} onOpenChange={(v) => { setMtoDialogOpen(v); if (!v) setMtoEditing(null); }}>
+                <DialogTrigger asChild>
+                  <Button onClick={() => { setMtoEditing(null); setMtoDialogOpen(true); }}>
+                    <Plus className="h-4 w-4 mr-2" />Add Minivan / Minitruck
+                  </Button>
+                </DialogTrigger>
+                <MtoDesignFormDialog design={mtoEditing} onSaved={() => { setMtoDialogOpen(false); setMtoEditing(null); refresh(); }} />
+              </Dialog>
+            </div>
+            <div className="rounded-lg border bg-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Image</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mtoDesigns.map((d) => (
+                    <TableRow key={d.id}>
+                      <TableCell><img src={d.image_url} alt={d.name} className="h-12 w-16 object-contain bg-muted rounded" /></TableCell>
+                      <TableCell className="font-medium">{d.name}</TableCell>
+                      <TableCell><Badge variant="secondary" className="capitalize">{d.category}</Badge></TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button size="sm" variant="outline" onClick={() => { setMtoEditing(d); setMtoDialogOpen(true); }}>
+                          <Pencil className="h-3.5 w-3.5 mr-1" />Edit
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={async () => {
+                          if (!confirm(`Delete design "${d.name}"?`)) return;
+                          const { error } = await supabase.from("made_to_order_designs").delete().eq("id", d.id);
+                          if (error) toast.error(error.message); else { toast.success("Design deleted"); refresh(); }
+                        }}>Delete</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {mtoDesigns.length === 0 && (
+                    <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No designs yet.</TableCell></TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="mto-inquiries" className="mt-6">
+            <div className="rounded-lg border bg-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Design</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Notes</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mtoInquiries.map((q) => (
+                    <TableRow key={q.id}>
+                      <TableCell className="text-xs">{new Date(q.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell><Badge variant="secondary" className="capitalize">{q.category}</Badge></TableCell>
+                      <TableCell>{q.design_name ?? "—"}</TableCell>
+                      <TableCell className="font-medium">{q.full_name}</TableCell>
+                      <TableCell className="text-xs">{q.contact_number}<br /><span className="text-muted-foreground">{q.email}</span></TableCell>
+                      <TableCell className="text-xs max-w-[260px] whitespace-pre-wrap">{q.notes ?? "—"}</TableCell>
+                    </TableRow>
+                  ))}
+                  {mtoInquiries.length === 0 && (
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No made-to-order inquiries yet.</TableCell></TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
