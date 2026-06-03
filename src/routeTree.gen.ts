@@ -9,14 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as DesignMyOwnRouteImport } from './routes/design-my-own'
+import { Route as MadeToOrderRouteImport } from './routes/made-to-order'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
-const DesignMyOwnRoute = DesignMyOwnRouteImport.update({
-  id: '/design-my-own',
-  path: '/design-my-own',
+const MadeToOrderRoute = MadeToOrderRouteImport.update({
+  id: '/made-to-order',
+  path: '/made-to-order',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -39,43 +39,43 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/design-my-own': typeof DesignMyOwnRoute
+  '/made-to-order': typeof MadeToOrderRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/design-my-own': typeof DesignMyOwnRoute
+  '/made-to-order': typeof MadeToOrderRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
-  '/design-my-own': typeof DesignMyOwnRoute
+  '/made-to-order': typeof MadeToOrderRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/auth' | '/design-my-own'
+  fullPaths: '/' | '/admin' | '/auth' | '/made-to-order'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/auth' | '/design-my-own'
-  id: '__root__' | '/' | '/admin' | '/auth' | '/design-my-own'
+  to: '/' | '/admin' | '/auth' | '/made-to-order'
+  id: '__root__' | '/' | '/admin' | '/auth' | '/made-to-order'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
-  DesignMyOwnRoute: typeof DesignMyOwnRoute
+  MadeToOrderRoute: typeof MadeToOrderRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/design-my-own': {
-      id: '/design-my-own'
-      path: '/design-my-own'
-      fullPath: '/design-my-own'
-      preLoaderRoute: typeof DesignMyOwnRouteImport
+    '/made-to-order': {
+      id: '/made-to-order'
+      path: '/made-to-order'
+      fullPath: '/made-to-order'
+      preLoaderRoute: typeof MadeToOrderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -106,7 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
-  DesignMyOwnRoute: DesignMyOwnRoute,
+  MadeToOrderRoute: MadeToOrderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

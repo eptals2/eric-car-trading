@@ -75,7 +75,7 @@ function Index() {
                 <a href="#cars">Get now<ArrowRight className="ml-2 h-4 w-4" /></a>
               </Button>
               <Button size="lg" asChild className="bg-white text-slate-950 hover:bg-slate-100">
-                <a href="/design-my-own">Design my own car</a>
+                <a href="/made-to-order">Made to Order</a>
               </Button>
             </div>
           </div>
