@@ -20,7 +20,10 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { CarDetailsDialog } from "@/components/CarDetailsDialog";
 import { PHP } from "@/lib/format";
 import type { Tables } from "@/integrations/supabase/types";
-import { ArrowRight, ShieldCheck, Banknote, Wrench, Search } from "lucide-react";
+import { ArrowRight, ShieldCheck, Banknote, Wrench, Search, Sparkles, Loader2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { aiCarSearch } from "@/lib/ai-search.functions";
+import { toast } from "sonner";
 
 import heroCars from "@/assets/hero-cars.png";
 import BrandMarquee from "@/components/BrandMarquee";
@@ -37,6 +40,27 @@ function Index() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const ITEMS_PER_PAGE = 9;
+
+  const askAi = useServerFn(aiCarSearch);
+  const [aiQuery, setAiQuery] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiReply, setAiReply] = useState<string | null>(null);
+
+  const handleAiSubmit = async (q?: string) => {
+    const query = (q ?? aiQuery).trim();
+    if (!query) return;
+    setAiQuery(query);
+    setAiLoading(true);
+    setAiReply(null);
+    try {
+      const { reply } = await askAi({ data: { query } });
+      setAiReply(reply);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "AI unavailable");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   useEffect(() => {
     supabase.from("cars").select("*").order("created_at", { ascending: false }).then(({ data }) => {
@@ -61,22 +85,86 @@ function Index() {
           style={{ backgroundImage: `url(${heroCars})` }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent pointer-events-none" />
-        <div className="container mx-auto px-4 py-20 md:py-32 relative">
-          <div className="max-w-3xl">
-            <Badge className="mb-5 bg-white/10 text-white hover:bg-white/15 border-0">Trusted dealership</Badge>
-            <h1 className="font-display text-5xl md:text-7xl leading-[0.95]">
-              GET YOUR<br /><span className="text-primary-foreground/95 [text-shadow:0_0_40px_oklch(0.65_0.24_27_/_0.6)]">DREAM CAR</span> TODAY
-            </h1>
-            <p className="mt-6 text-lg text-white/80 max-w-xl">
-              Browse premium vehicles with flexible payment options tailored to your budget. Drive home today.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button size="lg" asChild className="shadow-[var(--shadow-glow)]">
-                <a href="#cars">Get now<ArrowRight className="ml-2 h-4 w-4" /></a>
-              </Button>
-              <Button size="lg" asChild className="bg-white text-slate-950 hover:bg-slate-100">
-                <a href="/made-to-order">Made to Order</a>
-              </Button>
+        <div className="container mx-auto px-4 py-16 md:py-24 relative">
+          <div className="grid items-center gap-10 md:gap-6 md:grid-cols-[1fr_auto_1fr]">
+            {/* Left: existing hero */}
+            <div>
+              <Badge className="mb-5 bg-white/10 text-white hover:bg-white/15 border-0">Trusted dealership</Badge>
+              <h1 className="font-display text-5xl md:text-6xl leading-[0.95]">
+                GET YOUR<br /><span className="text-primary-foreground/95 [text-shadow:0_0_40px_oklch(0.65_0.24_27_/_0.6)]">DREAM CAR</span> TODAY
+              </h1>
+              <p className="mt-6 text-base md:text-lg text-white/80 max-w-xl">
+                Browse premium vehicles with flexible payment options tailored to your budget. Drive home today.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button size="lg" asChild className="shadow-[var(--shadow-glow)]">
+                  <a href="#cars">Get now<ArrowRight className="ml-2 h-4 w-4" /></a>
+                </Button>
+                <Button size="lg" asChild className="bg-white text-slate-950 hover:bg-slate-100">
+                  <a href="/made-to-order">Made to Order</a>
+                </Button>
+              </div>
+            </div>
+
+            {/* OR divider */}
+            <div className="flex md:flex-col items-center justify-center gap-3 md:h-full" aria-hidden>
+              <div className="h-px w-16 md:h-24 md:w-px bg-white/30" />
+              <span className="font-display text-2xl text-white/80">OR</span>
+              <div className="h-px w-16 md:h-24 md:w-px bg-white/30" />
+            </div>
+
+            {/* Right: AI search */}
+            <div className="md:text-right">
+              <div className="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-white/10 text-xs font-medium">
+                <Sparkles className="h-3.5 w-3.5" /> AI-powered
+              </div>
+              <h2 className="font-display text-4xl md:text-5xl leading-[1.05]">
+                Find Your<br />Next Car with <span className="text-primary-foreground/95 [text-shadow:0_0_40px_oklch(0.65_0.24_27_/_0.6)]">AI</span>
+              </h2>
+              <form
+                onSubmit={(e) => { e.preventDefault(); handleAiSubmit(); }}
+                className="mt-6 flex flex-col gap-2"
+              >
+                <div className="relative">
+                  <Input
+                    value={aiQuery}
+                    onChange={(e) => setAiQuery(e.target.value)}
+                    placeholder="Do you need help in getting your dream car?"
+                    className="h-12 pr-12 rounded-full bg-white/95 text-foreground placeholder:text-muted-foreground border-0"
+                    disabled={aiLoading}
+                  />
+                  <button
+                    type="submit"
+                    disabled={aiLoading || !aiQuery.trim()}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50"
+                    aria-label="Ask AI"
+                  >
+                    {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+                  </button>
+                </div>
+                <div className="text-sm text-white/70 md:text-right">
+                  Ask our AI about any vehicle
+                </div>
+                <div className="flex flex-wrap gap-2 md:justify-end">
+                  {["Show me SUVs under 800k", "Best family car", "Cheapest available"].map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => handleAiSubmit(s)}
+                      disabled={aiLoading}
+                      className="text-xs px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition disabled:opacity-50"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </form>
+
+              {aiReply && (
+                <div className="mt-4 rounded-xl bg-white/95 text-foreground p-4 text-left text-sm whitespace-pre-wrap shadow-lg max-h-64 overflow-auto">
+                  {aiReply}
+                </div>
+              )}
             </div>
           </div>
         </div>
