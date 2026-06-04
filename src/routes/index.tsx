@@ -20,7 +20,10 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { CarDetailsDialog } from "@/components/CarDetailsDialog";
 import { PHP } from "@/lib/format";
 import type { Tables } from "@/integrations/supabase/types";
-import { ArrowRight, ShieldCheck, Banknote, Wrench, Search } from "lucide-react";
+import { ArrowRight, ShieldCheck, Banknote, Wrench, Search, Sparkles, Loader2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { aiCarSearch } from "@/lib/ai-search.functions";
+import { toast } from "sonner";
 
 import heroCars from "@/assets/hero-cars.png";
 import BrandMarquee from "@/components/BrandMarquee";
@@ -37,6 +40,27 @@ function Index() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const ITEMS_PER_PAGE = 9;
+
+  const askAi = useServerFn(aiCarSearch);
+  const [aiQuery, setAiQuery] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiReply, setAiReply] = useState<string | null>(null);
+
+  const handleAiSubmit = async (q?: string) => {
+    const query = (q ?? aiQuery).trim();
+    if (!query) return;
+    setAiQuery(query);
+    setAiLoading(true);
+    setAiReply(null);
+    try {
+      const { reply } = await askAi({ data: { query } });
+      setAiReply(reply);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "AI unavailable");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   useEffect(() => {
     supabase.from("cars").select("*").order("created_at", { ascending: false }).then(({ data }) => {
