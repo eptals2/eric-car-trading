@@ -41,7 +41,9 @@ function MadeToOrderPage() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Design | null>(null);
   const [formOpen, setFormOpen] = useState(false);
-  const [tab, setTab] = useState<"minivan" | "minitruck">("minivan");
+  const [tab, setTab] = useState<"all" | "minivan" | "minitruck">("all");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 9;
 
   useEffect(() => {
     (async () => {
