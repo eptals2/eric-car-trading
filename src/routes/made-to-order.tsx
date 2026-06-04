@@ -83,25 +83,28 @@ function MadeToOrderPage() {
         </section>
 
         <section className="container mx-auto px-4 py-10">
-          <Tabs value={tab} onValueChange={(v) => setTab(v as "minivan" | "minitruck")}>
-            <TabsList className="mb-6">
+          <Tabs value={tab} onValueChange={(v) => { setTab(v as "all" | "minivan" | "minitruck"); setPage(1); }}>
+            <TabsList className="mb-6 flex-wrap">
+              <TabsTrigger value="all" className="gap-2">
+                All ({designs.length})
+              </TabsTrigger>
               <TabsTrigger value="minivan" className="gap-2">
-                <CarIcon className="h-4 w-4" /> Minivans ({grouped.minivan.length})
+                <CarIcon className="h-4 w-4" /> Minivans ({designs.filter((d) => d.category === "minivan").length})
               </TabsTrigger>
               <TabsTrigger value="minitruck" className="gap-2">
-                <Truck className="h-4 w-4" /> Minitrucks ({grouped.minitruck.length})
+                <Truck className="h-4 w-4" /> Minitrucks ({designs.filter((d) => d.category === "minitruck").length})
               </TabsTrigger>
             </TabsList>
 
-            {(["minivan", "minitruck"] as const).map((cat) => (
-              <TabsContent key={cat} value={cat}>
-                {loading ? (
-                  <div className="text-center py-16 text-muted-foreground">Loading designs...</div>
-                ) : grouped[cat].length === 0 ? (
-                  <div className="text-center py-16 text-muted-foreground">No designs available yet.</div>
-                ) : (
+            <TabsContent value={tab}>
+              {loading ? (
+                <div className="text-center py-16 text-muted-foreground">Loading designs...</div>
+              ) : paginated.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">No designs available yet.</div>
+              ) : (
+                <>
                   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {grouped[cat].map((d) => {
+                    {paginated.map((d) => {
                       const isSelected = selected?.id === d.id;
                       return (
                         <button
@@ -126,9 +129,33 @@ function MadeToOrderPage() {
                       );
                     })}
                   </div>
-                )}
-              </TabsContent>
-            ))}
+
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-8">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={page === 1}
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      >
+                        Prev
+                      </Button>
+                      <span className="text-sm text-muted-foreground px-2">
+                        Page {page} of {totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={page === totalPages}
+                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </TabsContent>
           </Tabs>
         </section>
 
