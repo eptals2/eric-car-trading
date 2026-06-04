@@ -17,6 +17,8 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type Car = Tables<"cars">;
 type Inquiry = Tables<"inquiries">;
+type MtoDesign = Tables<"made_to_order_designs">;
+type MtoInquiry = Tables<"made_to_order_inquiries">;
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
 
@@ -29,14 +31,22 @@ function AdminPage() {
   const [editing, setEditing] = useState<Car | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [carSearch, setCarSearch] = useState("");
+  const [mtoDesigns, setMtoDesigns] = useState<MtoDesign[]>([]);
+  const [mtoInquiries, setMtoInquiries] = useState<MtoInquiry[]>([]);
+  const [mtoDialogOpen, setMtoDialogOpen] = useState(false);
+  const [mtoEditing, setMtoEditing] = useState<MtoDesign | null>(null);
 
   const refresh = useCallback(async () => {
-    const [{ data: c }, { data: i }] = await Promise.all([
+    const [{ data: c }, { data: i }, { data: md }, { data: mi }] = await Promise.all([
       supabase.from("cars").select("*").order("price", { ascending: true }),
       supabase.from("inquiries").select("*, cars(name)").order("created_at", { ascending: false }),
+      supabase.from("made_to_order_designs").select("*").order("category").order("name"),
+      supabase.from("made_to_order_inquiries").select("*").order("created_at", { ascending: false }),
     ]);
     setCars(c ?? []);
     setInquiries((i as any) ?? []);
+    setMtoDesigns(md ?? []);
+    setMtoInquiries(mi ?? []);
   }, []);
 
   useEffect(() => {
@@ -87,6 +97,8 @@ function AdminPage() {
           <TabsList>
             <TabsTrigger value="cars">Cars ({cars.filter((c) => c.name.toLowerCase().includes(carSearch.trim().toLowerCase())).length} / {cars.length})</TabsTrigger>
             <TabsTrigger value="inquiries">Inquiries ({inquiries.length})</TabsTrigger>
+            <TabsTrigger value="mto-designs">MTO Designs ({mtoDesigns.length})</TabsTrigger>
+            <TabsTrigger value="mto-inquiries">MTO Inquiries ({mtoInquiries.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="cars" className="mt-6">
@@ -187,6 +199,86 @@ function AdminPage() {
                   ))}
                   {inquiries.length === 0 && (
                     <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No inquiries yet.</TableCell></TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="mto-designs" className="mt-6">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+              <p className="text-sm text-muted-foreground">Manage made-to-order minivan and minitruck designs.</p>
+              <Dialog open={mtoDialogOpen} onOpenChange={(v) => { setMtoDialogOpen(v); if (!v) setMtoEditing(null); }}>
+                <DialogTrigger asChild>
+                  <Button onClick={() => { setMtoEditing(null); setMtoDialogOpen(true); }}>
+                    <Plus className="h-4 w-4 mr-2" />Add Minivan / Minitruck
+                  </Button>
+                </DialogTrigger>
+                <MtoDesignFormDialog design={mtoEditing} onSaved={() => { setMtoDialogOpen(false); setMtoEditing(null); refresh(); }} />
+              </Dialog>
+            </div>
+            <div className="rounded-lg border bg-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Image</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mtoDesigns.map((d) => (
+                    <TableRow key={d.id}>
+                      <TableCell><img src={d.image_url} alt={d.name} className="h-12 w-16 object-contain bg-muted rounded" /></TableCell>
+                      <TableCell className="font-medium">{d.name}</TableCell>
+                      <TableCell><Badge variant="secondary" className="capitalize">{d.category}</Badge></TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button size="sm" variant="outline" onClick={() => { setMtoEditing(d); setMtoDialogOpen(true); }}>
+                          <Pencil className="h-3.5 w-3.5 mr-1" />Edit
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={async () => {
+                          if (!confirm(`Delete design "${d.name}"?`)) return;
+                          const { error } = await supabase.from("made_to_order_designs").delete().eq("id", d.id);
+                          if (error) toast.error(error.message); else { toast.success("Design deleted"); refresh(); }
+                        }}>Delete</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {mtoDesigns.length === 0 && (
+                    <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No designs yet.</TableCell></TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="mto-inquiries" className="mt-6">
+            <div className="rounded-lg border bg-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Design</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Notes</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mtoInquiries.map((q) => (
+                    <TableRow key={q.id}>
+                      <TableCell className="text-xs">{new Date(q.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell><Badge variant="secondary" className="capitalize">{q.category}</Badge></TableCell>
+                      <TableCell>{q.design_name ?? "—"}</TableCell>
+                      <TableCell className="font-medium">{q.full_name}</TableCell>
+                      <TableCell className="text-xs">{q.contact_number}<br /><span className="text-muted-foreground">{q.email}</span></TableCell>
+                      <TableCell className="text-xs max-w-[260px] whitespace-pre-wrap">{q.notes ?? "—"}</TableCell>
+                    </TableRow>
+                  ))}
+                  {mtoInquiries.length === 0 && (
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No made-to-order inquiries yet.</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
@@ -303,6 +395,86 @@ function CarFormDialog({ car, onSaved }: { car: Car | null; onSaved: () => void 
           )}
         </div>
         <Button type="submit" className="w-full" disabled={saving}>{saving ? "Saving..." : car ? "Update Car" : "Add Car"}</Button>
+      </form>
+    </DialogContent>
+  );
+}
+
+function MtoDesignFormDialog({ design, onSaved }: { design: MtoDesign | null; onSaved: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [category, setCategory] = useState<"minivan" | "minitruck">(design?.category ?? "minivan");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [existingImage, setExistingImage] = useState<string | null>(design?.image_url ?? null);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const name = String(fd.get("name")).trim();
+    const description = String(fd.get("description") || "");
+    if (!name) { toast.error("Name required"); return; }
+    if (!existingImage && !imageFile) { toast.error("Image required"); return; }
+    setSaving(true);
+
+    let image_url = existingImage ?? "";
+    if (imageFile) {
+      const ext = imageFile.name.split(".").pop();
+      const path = `mto/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("car-images").upload(path, imageFile);
+      if (upErr) { toast.error(upErr.message); setSaving(false); return; }
+      image_url = supabase.storage.from("car-images").getPublicUrl(path).data.publicUrl;
+    }
+
+    const payload = { name, category, description: description || null, image_url };
+    const { error } = design
+      ? await supabase.from("made_to_order_designs").update(payload).eq("id", design.id)
+      : await supabase.from("made_to_order_designs").insert(payload);
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(design ? "Design updated" : "Design added");
+    onSaved();
+  }
+
+  return (
+    <DialogContent className="max-h-[90vh] overflow-y-auto">
+      <DialogHeader><DialogTitle className="font-display text-2xl">{design ? "Edit Design" : "Add Minivan / Minitruck"}</DialogTitle></DialogHeader>
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div>
+          <Label>Category</Label>
+          <div className="flex gap-2 mt-1">
+            {(["minivan", "minitruck"] as const).map((c) => (
+              <Button key={c} type="button" variant={category === c ? "default" : "outline"} onClick={() => setCategory(c)} className="capitalize flex-1">
+                {c}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="name">Name</Label>
+          <Input id="name" name="name" required defaultValue={design?.name ?? ""} maxLength={150} />
+        </div>
+        <div>
+          <Label htmlFor="description">Description (optional)</Label>
+          <Textarea id="description" name="description" defaultValue={design?.description ?? ""} maxLength={500} />
+        </div>
+        <div>
+          <Label htmlFor="mto-image">Image</Label>
+          <Input id="mto-image" type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
+          {(imageFile || existingImage) && (
+            <div className="mt-3 relative w-fit">
+              <img
+                src={imageFile ? URL.createObjectURL(imageFile) : existingImage!}
+                alt=""
+                className="h-32 w-44 object-contain bg-muted rounded"
+              />
+              <button
+                type="button"
+                onClick={() => { setImageFile(null); setExistingImage(null); }}
+                className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full h-5 w-5 text-xs leading-none"
+              >×</button>
+            </div>
+          )}
+        </div>
+        <Button type="submit" className="w-full" disabled={saving}>{saving ? "Saving..." : design ? "Update Design" : "Add Design"}</Button>
       </form>
     </DialogContent>
   );
