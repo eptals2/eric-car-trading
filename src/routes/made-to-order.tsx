@@ -57,10 +57,16 @@ function MadeToOrderPage() {
     })();
   }, []);
 
-  const grouped = useMemo(() => ({
-    minivan: designs.filter((d) => d.category === "minivan"),
-    minitruck: designs.filter((d) => d.category === "minitruck"),
-  }), [designs]);
+  const filtered = useMemo(() => {
+    if (tab === "all") return designs;
+    return designs.filter((d) => d.category === tab);
+  }, [designs, tab]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filtered.slice(start, start + PAGE_SIZE);
+  }, [filtered, page]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
