@@ -13,6 +13,7 @@ import { Route as MadeToOrderRouteImport } from './routes/made-to-order'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiAiCarSearchRouteImport } from './routes/api/ai-car-search'
 
 const MadeToOrderRoute = MadeToOrderRouteImport.update({
   id: '/made-to-order',
@@ -34,18 +35,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiCarSearchRoute = ApiAiCarSearchRouteImport.update({
+  id: '/api/ai-car-search',
+  path: '/api/ai-car-search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/made-to-order': typeof MadeToOrderRoute
+  '/api/ai-car-search': typeof ApiAiCarSearchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/made-to-order': typeof MadeToOrderRoute
+  '/api/ai-car-search': typeof ApiAiCarSearchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,20 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/made-to-order': typeof MadeToOrderRoute
+  '/api/ai-car-search': typeof ApiAiCarSearchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/auth' | '/made-to-order'
+  fullPaths: '/' | '/admin' | '/auth' | '/made-to-order' | '/api/ai-car-search'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/auth' | '/made-to-order'
-  id: '__root__' | '/' | '/admin' | '/auth' | '/made-to-order'
+  to: '/' | '/admin' | '/auth' | '/made-to-order' | '/api/ai-car-search'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/made-to-order'
+    | '/api/ai-car-search'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +82,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   MadeToOrderRoute: typeof MadeToOrderRoute
+  ApiAiCarSearchRoute: typeof ApiAiCarSearchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai-car-search': {
+      id: '/api/ai-car-search'
+      path: '/api/ai-car-search'
+      fullPath: '/api/ai-car-search'
+      preLoaderRoute: typeof ApiAiCarSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,16 +130,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   MadeToOrderRoute: MadeToOrderRoute,
+  ApiAiCarSearchRoute: ApiAiCarSearchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
