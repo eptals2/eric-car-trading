@@ -145,6 +145,7 @@ function Index() {
                   />
                   <button
                     type="submit"
+                    onClick={() => handleAiSubmit()}
                     disabled={aiLoading || !aiQuery.trim()}
                     className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50"
                     aria-label="Ask AI"
