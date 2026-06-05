@@ -16,9 +16,9 @@ export const Route = createFileRoute("/api/ai-car-search")({
           return Response.json({ error: "Please enter a question first." }, { status: 400 });
         }
 
-        const apiKey = process.env.LOVABLE_API_KEY;
+        const apiKey = process.env.GEMINI_KEY;
         if (!apiKey) {
-          console.error("[ai-car-search] Missing LOVABLE_API_KEY runtime secret");
+          console.error("[ai-car-search] Missing GEMINI_KEY runtime secret");
           return Response.json({ error: "AI is not configured yet. Please try again shortly." }, { status: 500 });
         }
 
@@ -43,14 +43,14 @@ export const Route = createFileRoute("/api/ai-car-search")({
             .join("\n");
         }
 
-        const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const aiResponse = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash-lite",
+            model: "gemini-2.5-flash",
             messages: [
               {
                 role: "system",

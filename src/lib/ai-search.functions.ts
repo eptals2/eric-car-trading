@@ -9,7 +9,7 @@ export const aiCarSearch = createServerFn({ method: "POST" })
     return { query: q };
   })
   .handler(async ({ data }) => {
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env.GEMINI_KEY;
     if (!apiKey) throw new Error("AI not configured");
 
     const supabase = createClient(
@@ -25,7 +25,7 @@ export const aiCarSearch = createServerFn({ method: "POST" })
       .map((c, i) => `${i + 1}. ${c.name} — PHP ${c.price} (${c.status})${c.description ? " — " + String(c.description).slice(0, 120) : ""}`)
       .join("\n");
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
