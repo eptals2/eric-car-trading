@@ -21,14 +21,17 @@ import { CarDetailsDialog } from "@/components/CarDetailsDialog";
 import { PHP } from "@/lib/format";
 import type { Tables } from "@/integrations/supabase/types";
 import { ArrowRight, ShieldCheck, Banknote, Wrench, Search, Sparkles, Loader2 } from "lucide-react";
-import { useServerFn } from "@tanstack/react-start";
-import { aiCarSearch } from "@/lib/ai-search.functions";
 import { toast } from "sonner";
 
 import heroCars from "@/assets/hero-cars.png";
 import BrandMarquee from "@/components/BrandMarquee";
 
 type Car = Tables<"cars">;
+
+type AiSearchResponse = {
+  reply?: string;
+  error?: string;
+};
 
 export const Route = createFileRoute("/")({ component: Index });
 
@@ -41,7 +44,6 @@ function Index() {
   const [searchQuery, setSearchQuery] = useState("");
   const ITEMS_PER_PAGE = 9;
 
-  const askAi = useServerFn(aiCarSearch);
   const [aiQuery, setAiQuery] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiReply, setAiReply] = useState<string | null>(null);
@@ -53,8 +55,16 @@ function Index() {
     setAiLoading(true);
     setAiReply(null);
     try {
-      const { reply } = await askAi({ data: { query } });
-      setAiReply(reply);
+      const response = await fetch("/api/ai-car-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as AiSearchResponse;
+
+      if (!response.ok) throw new Error(payload.error ?? "AI unavailable");
+
+      setAiReply(payload.reply ?? "Sorry, no answer.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "AI unavailable");
     } finally {
