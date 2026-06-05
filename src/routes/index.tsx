@@ -178,7 +178,7 @@ function Index() {
             </div>
           </div>
         </div>
-        <div className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-primary/30 blur-3xl" />
+        <div className="pointer-events-none absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-primary/30 blur-3xl" />
       </section>
 
       {/* Why */}
