@@ -16,9 +16,9 @@ export const Route = createFileRoute("/api/ai-car-search")({
           return Response.json({ error: "Please enter a question first." }, { status: 400 });
         }
 
-        const apiKey = process.env.GEMINI_KEY;
+        const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
-          console.error("[ai-car-search] Missing GEMINI_KEY runtime secret");
+          console.error("[ai-car-search] Missing GEMINI_API_KEY runtime secret");
           return Response.json({ error: "AI is not configured yet. Please try again shortly." }, { status: 500 });
         }
 

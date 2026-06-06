@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
+import { CAR_ASSISTANT_SYSTEM_PROMPT } from "@/ai/prompts/carAssistantPrompt";
 
 export const aiCarSearch = createServerFn({ method: "POST" })
   .inputValidator((input: { query: string }) => {
@@ -9,7 +10,7 @@ export const aiCarSearch = createServerFn({ method: "POST" })
     return { query: q };
   })
   .handler(async ({ data }) => {
-    const apiKey = process.env.GEMINI_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("AI not configured");
 
     const supabase = createClient(
@@ -37,7 +38,9 @@ export const aiCarSearch = createServerFn({ method: "POST" })
           {
             role: "system",
             content:
-              "You are a friendly car-buying assistant for Eric Car Trading (Philippines). Recommend cars only from the provided inventory. Be concise (max 4 short bullet points). Always mention the car name and price. If nothing matches, suggest the closest options.",
+              CAR_ASSISTANT_SYSTEM_PROMPT,
+          },
+          {
           },
           {
             role: "user",
