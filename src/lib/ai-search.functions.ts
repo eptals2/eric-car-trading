@@ -9,7 +9,7 @@ export const aiCarSearch = createServerFn({ method: "POST" })
     return { query: q };
   })
   .handler(async ({ data }) => {
-    const apiKey = process.env.GEMINI_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("AI not configured");
 
     const supabase = createClient(
